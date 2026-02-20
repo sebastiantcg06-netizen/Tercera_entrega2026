@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Álgebra básica · Matrices 2x2</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== MENÚ LATERAL IZQUIERDO ===== */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #0b2b3f 0%, #123b4e 100%);
+      color: #e0f2fe;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 20px rgba(0, 20, 30, 0.5);
+      transition: all 0.2s;
+      flex-shrink: 0; /* Evita que se aplaste en pantallas pequeñas */
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 2rem 1.5rem 1rem;
+      border-bottom: 1px solid #2a5a70;
+    }
+
+    .sidebar-header h2 {
+      font-weight: 300;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      color: #b3e5fc;
+    }
+
+    .sidebar-header p {
+      font-size: 0.85rem;
+      color: #8fb5c5;
+      margin-top: 6px;
+    }
+
+    .nav-menu {
+      flex: 1;
+      padding: 2rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.5rem;
+      margin: 0 0.5rem;
+      border-radius: 30px 0 0 30px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #cbd5e1;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: calc(100% - 1rem);
+      text-align: left;
+    }
+
+    .nav-item i { font-style: normal; font-size: 1.4rem; width: 28px; } /* emojis como iconos */
+
+    .nav-item:hover {
+      background: #1f4b60;
+      color: #ffffff;
+    }
+
+    .nav-item.active {
+      background: #f1f5f9;
+      color: #0b2b3f;
+      box-shadow: -5px 5px 15px rgba(0,0,0,0.2);
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 2rem 1.5rem;
+      font-size: 0.8rem;
+      border-top: 1px solid #2a5a70;
+      color: #6d95a8;
+    }
+
+    /* ===== CONTENIDO PRINCIPAL ===== */
+    .main-content {
+      flex: 1;
+      padding: 2.5rem 3rem;
+      background: #f8fafc;
+      overflow-y: auto;
+    }
+
+    .page {
+      display: none;
+      max-width: 950px;
+      margin: 0 auto;
+      animation: fade 0.25s ease;
+    }
+
+    .page.active-page {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0.4; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 400;
+      color: #0b2b3f;
+      margin-bottom: 0.5rem;
+      border-left: 6px solid #2f8fbb;
+      padding-left: 1.5rem;
+    }
+
+    .subtitle {
+      color: #3b5f70;
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
+      font-style: italic;
+    }
+
+    /* tarjetas y matrices */
+    .matrix-card {
+      background: white;
+      border-radius: 32px;
+      padding: 2rem;
+      box-shadow: 0 15px 30px -12px rgba(0, 30, 50, 0.2);
+      margin: 2rem 0;
+    }
+
+    .matrix-display {
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      background: #e9f2f7;
+      padding: 1.8rem;
+      border-radius: 28px;
+    }
+
+    .matrix-box {
+      background: #ffffffd6;
+      backdrop-filter: blur(2px);
+      padding: 1.2rem 2rem;
+      border-radius: 24px;
+      box-shadow: 0 6px 14px #0000001a;
+      text-align: center;
+    }
+
+    .matrix-box span.op {
+      font-size: 2rem;
+      font-weight: 300;
+      margin: 0 1rem;
+      color: #1d4e6b;
+    }
+
+    matrix-2x2 {
+      display: inline-grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem 1.8rem;
+      background: #0b2b3f;
+      padding: 1rem 2rem;
+      border-radius: 24px;
+      color: white;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 1.5rem;
+      box-shadow: 0 8px 0 #05161f;
+    }
+
+    matrix-2x2 span {
+      display: flex;
+      justify-content: center;
+      min-width: 55px;
+    }
+
+    .formula {
+      background: #e0f2fe;
+      padding: 1rem 2rem;
+      border-radius: 40px;
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #022b3a;
+      margin: 1.5rem 0;
+      text-align: center;
+      border: 2px dashed #2f8fbb;
+    }
+
+    .explanation-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: #1c404f;
+      margin: 1.2rem 0;
+    }
+
+    .example-box {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 1.8rem;
+      border: 2px solid #b3d9e8;
+      margin-top: 2rem;
+    }
+
+    .btn-calc {
+      background: #0b2b3f;
+      border: none;
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 40px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 6px 0 #05161f;
+    }
+
+    .btn-calc:hover {
+      background: #124d66;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #05161f;
+    }
+
+    .btn-calc:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #05161f;
+    }
+
+    .result-area {
+      background: #1c4f63;
+      color: white;
+      padding: 1.2rem;
+      border-radius: 50px;
+      font-size: 1.8rem;
+      font-weight: 600;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      margin-top: 1.5rem;
+    }
+
+    /* ===== ESTILOS PARA LA SUSTENTACIÓN (PDF VIEWER) ===== */
+    .doc-container {
+      background: white;
+      padding: 60px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-radius: 8px;
+      color: #333;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    .doc-header {
+      text-align: center;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .doc-header h2 { font-size: 1.8rem; color: #0b2b3f; margin-bottom: 10px; }
+    .doc-header p { color: #666; font-size: 0.9rem; }
+
+    .doc-section { margin-bottom: 2.5rem; }
+    .doc-section h3 { color: #2f8fbb; border-bottom: 1px solid #e0f2fe; padding-bottom: 5px; margin-bottom: 15px; font-size: 1.4rem; }
+    .doc-section h4 { color: #0b2b3f; margin: 20px 0 10px 0; font-size: 1.2rem; }
+    .doc-section p { margin-bottom: 10px; text-align: justify; }
+    .doc-section ul { margin-left: 20px; margin-bottom: 15px; }
+
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      border-left: 4px solid #2f8fbb;
+      margin: 15px 0;
+    }
+    
+    .code-block .comment { color: #75715e; font-style: italic; }
+    .code-block .keyword { color: #66d9ef; font-weight: bold; }
+    .code-block .function { color: #a6e22e; }
+    .code-block .string { color: #e6db74; }
+
+    .math-display {
+      background: #f4f4f4;
+      padding: 10px;
+      text-align: center;
+      font-family: 'Times New Roman', Times, serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    /* responsivo */
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .nav-item { border-radius: 30px; margin: 0; width: auto; }
+      .main-content { padding: 2rem 1.2rem; }
+      .doc-container { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Menú lateral izquierdo fijo -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>🧮 Matrices 2x2</h2>
+      <p>curso básico · álgebra</p>
+    </div>
+    <nav class="nav-menu" id="menuNavegacion">
+      <button class="nav-item active" data-page="intro">📘 Introducción</button>
+      <button class="nav-item" data-page="suma">➕ Suma / Resta</button>
+      <button class="nav-item" data-page="multiplicacion">✖️ Multiplicación</button>
+      <button class="nav-item" data-page="determinante">🔢 Determinante</button>
+      <button class="nav-item" data-page="inversa">🔄 Matriz inversa</button>
+      <button class="nav-item" data-page="ejercicios">✏️ Ejemplo práctico</button>
+      <!-- NUEVA PESTAÑA AÑADIDA -->
+      <button class="nav-item" data-page="sustentacion">📄 Sustentación</button>
+    </nav>
+    <div class="sidebar-footer">
+      ⚡ operaciones 2x2<br>para empezar
+    </div>
+  </aside>
+
+  <!-- Contenido principal: páginas dinámicas -->
+  <main class="main-content" id="mainContent">
+    
+    <!-- Página INTRO -->
+    <section class="page active-page" id="page-intro">
+      <h1>📘 bienvenido · matrices 2x2</h1>
+      <div class="subtitle">núcleo del álgebra lineal básica</div>
+      <div class="matrix-card">
+        <p class="explanation-text">
+          Una <strong>matriz de 2×2</strong> es un arreglo rectangular de 4 números ordenados en dos filas y dos columnas.
+          Se representa generalmente como:
+        </p>
+        <div class="matrix-display">
+          <matrix-2x2>
+            <span>a</span><span>b</span>
+            <span>c</span><span>d</span>
+          </matrix-2x2>
+          <span style="font-size:2rem;">≡</span>
+          <div style="text-align: left; font-size:1.3rem">
+            fila 1: a , b <br>
+            fila 2: c , d
+          </div>
+        </div>
+        <p class="explanation-text" style="margin-top:2rem;">
+          En este curso básico dominarás: <strong>suma, resta, multiplicación, determinante e inversa</strong>.
+          Usa el menú lateral para explorar cada operación con explicaciones claras.
+        </p>
+        <div class="example-box">
+          💡 <em>Nota:</em> Las matrices se denotan con letras mayúsculas (A, B, ...).  
+          Por ejemplo:  \( A = \begin{pmatrix} 4 & 7 \\ 2 & 6 \end{pmatrix} \) 
+        </div>
+      </div>
+    </section>
+
+    <!-- Página SUMA / RESTA -->
+    <section class="page" id="page-suma">
+      <h1>➕ suma y resta de matrices</h1>
+      <div class="subtitle">misma dimensión · término a término</div>
+      <div class="matrix-card">
+        <p class="explanation-text">
+          Para sumar (o restar) dos matrices 2x2, simplemente <strong>sumamos (restamos) los elementos que ocupan la misma posición</strong>.
+        </p>
+        <div class="formula">
+          (A ± B)<sub>ij</sub> = a<sub>ij</sub> ± b<sub>ij</sub>
+        </div>
+        <div class="matrix-display">
+          <matrix-2x2><span>a₁₁</span><span>a₁₂</span><span>a₂₁</span><span>a₂₂</span></matrix-2x2>
+          <span style="font-size:2.5rem;">+</span>
+          <matrix-2x2><span>b₁₁</span><span>b₁₂</span><span>b₂₁</span><span>b₂₂</span></matrix-2x2>
+          <span style="font-size:2.5rem;">=</span>
+          <matrix-2x2><span>a₁₁±b₁₁</span><span>a₁₂±b₁₂</span><span>a₂₁±b₂₁</span><span>a₂₂±b₂₂</span></matrix-2x2>
+        </div>
+        <p class="explanation-text" style="margin-top:1.5rem;">
+          <strong>Ejemplo numérico:</strong>  
+          Sean \( A = \begin{pmatrix} 1 & 3 \\ 5 & 2 \end{pmatrix} \), \( B = \begin{pmatrix} 4 & 0 \\ 1 & 8 \end{pmatrix} \).  
+          Entonces \( A + B = \begin{pmatrix} 5 & 3 \\ 6 & 10 \end{pmatrix} \).
+        </p>
+      </div>
+    </section>
+
+    <!-- Página MULTIPLICACIÓN (2x2) -->
+    <section class="page" id="page-multiplicacion">
+      <h1>✖️ multiplicación de matrices 2x2</h1>
+      <div class="subtitle">producto fila por columna</div>
+      <div class="matrix-card">
+        <p class="explanation-text">
+          Multiplicar dos matrices 2x2 requiere combinar filas de la primera con columnas de la segunda.
+        </p>
+        <div class="matrix-display">
+          <matrix-2x2><span>a</span><span>b</span><span>c</span><span>d</span></matrix-2x2>
+          <span style="font-size:2.2rem;">·</span>
+          <matrix-2x2><span>e</span><span>f</span><span>g</span><span>h</span></matrix-2x2>
+          <span style="font-size:2.2rem;">=</span>
+        </div>
+        <div style="display:flex; justify-content:center; margin:1.2rem 0;">
+          <matrix-2x2 style="background:#16536e;">
+            <span>a·e + b·g</span><span>a·f + b·h</span>
+            <span>c·e + d·g</span><span>c·f + d·h</span>
+          </matrix-2x2>
+        </div>
+        <p class="explanation-text">
+          <strong>Ejemplo:</strong>  \( \begin{pmatrix}2&3\\0&4\end{pmatrix} \cdot \begin{pmatrix}1&5\\2&6\end{pmatrix} = \begin{pmatrix}2·1+3·2 & 2·5+3·6\\0·1+4·2 & 0·5+4·6\end{pmatrix} = \begin{pmatrix}8 & 28\\8 & 24\end{pmatrix} \).
+        </p>
+      </div>
+    </section>
+
+    <!-- Página DETERMINANTE -->
+    <section class="page" id="page-determinante">
+      <h1>🔢 determinante de 2x2</h1>
+      <div class="subtitle">un número asociado a la matriz</div>
+      <div class="matrix-card">
+        <p class="explanation-text">
+          Para una matriz \( \begin{pmatrix} a & b \\ c & d \end{pmatrix} \), el determinante se calcula como:
+        </p>
+        <div class="formula" style="font-size:2rem;">
+          det(A) = a·d - b·c
+        </div>
+        <div class="matrix-display" style="justify-content:center;">
+          <matrix-2x2><span>2</span><span>5</span><span>1</span><span>3</span></matrix-2x2>
+          <span style="font-size:2rem;">→ det = 2·3 - 5·1 = 6-5 = 1</span>
+        </div>
+        <p class="explanation-text">
+          El determinante indica si una matriz tiene inversa (det ≠ 0) y el factor de escala en transformaciones lineales.
+        </p>
+      </div>
+    </section>
+
+    <!-- Página INVERSA -->
+    <section class="page" id="page-inversa">
+      <h1>🔄 matriz inversa (2x2)</h1>
+      <div class="subtitle">solo si determinante ≠ 0</div>
+      <div class="matrix-card">
+        <p class="explanation-text">
+          Dada \(A = \begin{pmatrix}a&b\\c&d\end{pmatrix}\), su inversa se obtiene intercambiando a y d, cambiando signo a b y c, y dividiendo por el determinante:
+        </p>
+        <div class="formula" style="font-size:1.5rem; line-height:2.2;">
+          A⁻¹ = 1/(ad - bc) · <matrix-2x2 style="background:#022b3a; font-size:1.3rem; padding:0.6rem 1.2rem;"><span>d</span><span>-b</span><span>-c</span><span>a</span></matrix-2x2>
+        </div>
+        <p><strong>Ejemplo</strong>: \(A = \begin{pmatrix}4&3\\2&1\end{pmatrix}\), det = 4·1 - 3·2 = -2, entonces:</p>
+        <div style="font-size:1.6rem; margin:1rem 0;">A⁻¹ = 1/(-2) · <matrix-2x2 style="background:#0b2b3f;"><span>1</span><span>-3</span><span>-2</span><span>4</span></matrix-2x2> =  <matrix-2x2 style="background:#0b2b3f;"><span>-0.5</span><span>1.5</span><span>1</span><span>-2</span></matrix-2x2></div>
+      </div>
+    </section>
+
+    <!-- Página EJERCICIOS / interactivo simple -->
+    <section class="page" id="page-ejercicios">
+      <h1>✏️ ejemplo dinámico</h1>
+      <div class="subtitle">juega con operaciones 2x2</div>
+      <div class="matrix-card">
+        <p class="explanation-text">Haz clic para calcular la suma de dos matrices prefijadas (A + B):</p>
+        <div style="display:flex; gap:2rem; align-items:center; flex-wrap:wrap; justify-content:center;">
+          <matrix-2x2 id="ejA"><span>3</span><span>5</span><span>1</span><span>2</span></matrix-2x2>
+          <span style="font-size:3rem;">+</span>
+          <matrix-2x2 id="ejB"><span>2</span><span>4</span><span>0</span><span>7</span></matrix-2x2>
+        </div>
+        <div style="text-align:center; margin:1.8rem 0;">
+          <button class="btn-calc" id="calcSumaBtn">Calcular A + B</button>
+        </div>
+        <div class="result-area" id="resultadoSuma">—</div>
+        <p class="explanation-text" style="margin-top:2rem;">También puedes probar la resta o la multiplicación (consola mental). 
+          El objetivo es que practiques la lógica presentada.
+        </p>
+      </div>
+    </section>
+
+    <!-- NUEVA PÁGINA: SUSTENTACIÓN (CONTENIDO PDF) -->
+    <section class="page" id="page-sustentacion">
+      <h1>📄 Sustentación del Proyecto</h1>
+      <div class="subtitle">Documento: sebastian1.pdf</div>
+      
+      <div class="doc-container">
+        <div class="doc-header">
+          <h2>Operaciones Básicas con Matrices 2x2 en Python</h2>
+          <p>Documento generado en LaTeX | 20 de febrero de 2026</p>
+        </div>
+
+        <div class="doc-section">
+          <h3>Resumen</h3>
+          <p>Este documento presenta la implementación en Python de las operaciones fundamentales con matrices de dimensión 2x2. Se incluyen ejemplos de código y demostraciones matemáticas de cada operación.</p>
+        </div>
+
+        <div class="doc-section">
+          <h3>1. Introducción</h3>
+          <p>Las matrices 2x2 son fundamentales en álgebra lineal y tienen numerosas aplicaciones en diversos campos como la física, la computación gráfica y la resolución de sistemas de ecuaciones lineales.</p>
+        </div>
+
+        <div class="doc-section">
+          <h3>2. Operaciones Básicas</h3>
+          
+          <h4>2.1. Suma y Resta de Matrices</h4>
+          <p>La suma y resta de matrices se realiza elemento por elemento. Para matrices 2x2:</p>
+          <div class="math-display">
+            ( a b ; c d ) ± ( e f ; g h ) = ( a±e b±f ; c±g d±h )
+          </div>
+          <div class="code-block">
+<span class="keyword">def</span> <span class="function">suma_matrices</span>(A, B):
+    <span class="string">"""Suma dos matrices 2x2"""</span>
+    <span class="keyword">return</span> [[A[i][j] + B[i][j] <span class="keyword">for</span> j <span class="keyword">in</span> range(2)] <span class="keyword">for</span> i <span class="keyword">in</span> range(2)]
+
+<span class="keyword">def</span> <span class="function">resta_matrices</span>(A, B):
+    <span class="string">"""Resta dos matrices 2x2 (A - B)"""</span>
+    <span class="keyword">return</span> [[A[i][j] - B[i][j] <span class="keyword">for</span> j <span class="keyword">in</span> range(2)] <span class="keyword">for</span> i <span class="keyword">in</span> range(2)]
+
+<span class="comment"># Ejemplo</span>
+A = [[1, 2], [3, 4]]
+B = [[5, 6], [7, 8]]
+<span class="function">print</span>(<span class="string">"Matriz A:"</span>, A)
+<span class="function">print</span>(<span class="string">"Matriz B:"</span>, B)
+<span class="function">print</span>(<span class="string">"A + B ="</span>, suma_matrices(A, B))
+<span class="function">print</span>(<span class="string">"A - B ="</span>, resta_matrices(A, B))
+          </div>
+
+          <h4>2.2. Multiplicación de Matrices</h4>
+          <p>Para matrices 2x2, la multiplicación sigue la regla:</p>
+          <div class="math-display">
+            ( a b ; c d ) · ( e f ; g h ) = ( ae+bg af+bh ; ce+dg cf+dh )
+          </div>
+          <div class="code-block">
+<span class="keyword">def</span> <span class="function">multiplicacion_matrices</span>(A, B):
+    <span class="string">"""Multiplica dos matrices 2x2"""</span>
+    resultado = [[0, 0], [0, 0]]
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(2):
+        <span class="keyword">for</span> j <span class="keyword">in</span> range(2):
+            <span class="keyword">for</span> k <span class="keyword">in</span> range(2):
+                resultado[i][j] += A[i][k] * B[k][j]
+    <span class="keyword">return</span> resultado
+          </div>
+
+          <h4>2.3. Determinante</h4>
+          <p>El determinante de una matriz 2x2 se calcula como:</p>
+          <div class="math-display">
+            det( a b ; c d ) = ad - bc
+          </div>
+          <div class="code-block">
+<span class="keyword">def</span> <span class="function">determinante</span>(A):
+    <span class="string">"""Calcula el determinante de una matriz 2x2"""</span>
+    <span class="keyword">return</span> A[0][0] * A[1][1] - A[0][1] * A[1][0]
+          </div>
+
+          <h4>2.4. Matriz Inversa</h4>
+          <p>La inversa de una matriz 2x2 existe si su determinante es diferente de cero:</p>
+          <div class="math-display">
+            A⁻¹ = 1/det(A) · ( d -b ; -c a )
+          </div>
+          <div class="code-block">
+<span class="keyword">def</span> <span class="function">matriz_inversa</span>(A):
+    <span class="string">"""Calcula la inversa de una matriz 2x2 si existe"""</span>
+    det = determinante(A)
+    <span class="keyword">if</span> det == 0:
+        <span class="keyword">return</span> <span class="string">"La matriz no tiene inversa (determinante = 0)"</span>
+
+    <span class="keyword">return</span> [[A[1][1]/det , -A[0][1]/ det],
+            [-A[1][0]/det , A[0][0]/ det]]
+          </div>
+
+          <h4>2.5. Transpuesta</h4>
+          <p>La matriz transpuesta intercambia filas por columnas:</p>
+          <div class="math-display">
+            ( a b ; c d )T = ( a c ; b d )
+          </div>
+          <div class="code-block">
+<span class="keyword">def</span> <span class="function">transpuesta</span>(A):
+    <span class="string">"""Calcula la transpuesta de una matriz 2x2"""</span>
+    <span class="keyword">return</span> [[A[j][i] <span class="keyword">for</span> j <span class="keyword">in</span> range(2)] <span class="keyword">for</span> i <span class="keyword">in</span> range(2)]
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h3>4. Conclusiones</h3>
+          <p>Hemos implementado las operaciones fundamentales para matrices 2x2 en Python, incluyendo:</p>
+          <ul>
+            <li>Suma y resta de matrices</li>
+            <li>Multiplicación de matrices</li>
+            <li>Cálculo del determinante</li>
+            <li>Matriz inversa</li>
+            <li>Matriz transpuesta</li>
+          </ul>
+          <p>Estas operaciones son la base para problemas más complejos en álgebra lineal y pueden extenderse fácilmente a matrices de mayor dimensión.</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function() {
+      // Elementos del menú y páginas
+      const navItems = document.querySelectorAll('.nav-item');
+      const pages = document.querySelectorAll('.page');
+
+      // Función para cambiar de página
+      function switchPage(pageId) {
+        // Ocultar todas las páginas
+        pages.forEach(p => p.classList.remove('active-page'));
+        // Mostrar la seleccionada
+        const activePage = document.getElementById('page-' + pageId);
+        if (activePage) activePage.classList.add('active-page');
+
+        // Actualizar clase activa en el menú
+        navItems.forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.dataset.page === pageId) {
+            btn.classList.add('active');
+          }
+        });
+        
+        // Scroll al top al cambiar
+        document.querySelector('.main-content').scrollTop = 0;
+      }
+
+      // Asignar eventos a cada botón
+      navItems.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const pageId = btn.dataset.page;
+          if (pageId) switchPage(pageId);
+        });
+      });
+
+      // Pequeña validación: si alguien escribe en el ejemplo de ejercicios
+      const btnSuma = document.getElementById('calcSumaBtn');
+      const resultadoDiv = document.getElementById('resultadoSuma');
+      
+      if (btnSuma) {
+        btnSuma.addEventListener('click', () => {
+          // Matrices definidas en el html: A = [[3,5],[1,2]]  B = [[2,4],[0,7]]
+          const a11 = 3, a12 = 5, a21 = 1, a22 = 2;
+          const b11 = 2, b12 = 4, b21 = 0, b22 = 7;
+          // suma
+          const r11 = a11 + b11;
+          const r12 = a12 + b12;
+          const r21 = a21 + b21;
+          const r22 = a22 + b22;
+          resultadoDiv.innerHTML = `matriz resultante:  [[ ${r11} , ${r12} ]; [ ${r21} , ${r22} ]]`;
+        });
+      }
+
+      // Sincronización inicial
+      const activePageNow = document.querySelector('.page.active-page');
+      if (activePageNow) {
+        const id = activePageNow.getAttribute('id'); 
+        const pageName = id.replace('page-', '');
+        navItems.forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.dataset.page === pageName) btn.classList.add('active');
+        });
+      } else {
+        switchPage('intro');
+      }
+    })();
+  </script>
+</body>
+</html>
